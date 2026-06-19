@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -59,21 +60,16 @@ export default function Home() {
   return (
     <main className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-6">
-  <h1 className="text-3xl font-bold">
-    Hainanese Dialect Dictionary
-  </h1>
-
-  <p className="text-xl italic mt-2">
-    Dictionary of the Hainanese Language
-  </p>
-
-<p className="text-2xl font-bold mt-2">
-
-  海南话词典
-
-</p>
-</div>
+        <div className="mb-6">
+          <Image
+            src="/heading.jpg"
+            alt="Hainanese Dialect Dictionary"
+            width={1366}
+            height={466}
+            priority
+            className="w-full h-auto"
+          />
+        </div>
 
         <input
           className="border p-3 w-full mb-6"
