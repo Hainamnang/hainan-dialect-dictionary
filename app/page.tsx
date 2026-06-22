@@ -83,32 +83,16 @@ export default function Home() {
             className="border rounded-lg p-3 w-full"
             placeholder="ค้นหาคำศัพท์..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+  setSearch(e.target.value);
+  setSelectedWord(null);
+}}
           />
         </section>
 
-        {/* 3. Search Results */}
-        <section className="bg-white rounded-xl border p-4">
-          <h2 className="font-bold mb-3">Search Results / ผลการค้นหา</h2>
+        
 
-          <div className="space-y-2">
-            {filteredWords.map((word) => (
-              <button
-                key={word.id}
-                onClick={() => setSelectedWord(word)}
-                className="w-full text-left border rounded-lg p-3 hover:bg-stone-100"
-              >
-                <div className="text-sm text-gray-500">#{word.id}</div>
-                <div className="font-bold">{word.meaning_th || "ไม่มีคำแปลไทย"}</div>
-                <div className="text-sm">
-                  {word.simplified} {word.traditional}
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 4. Vocabulary Detail */}
+        {/* 3. Vocabulary Detail */}
         <section className="bg-white rounded-xl border p-4">
           <h2 className="font-bold mb-3">Vocabulary Detail / รายละเอียดคำศัพท์</h2>
 
@@ -133,7 +117,26 @@ export default function Home() {
             <p className="text-gray-500">คลิกคำศัพท์จากผลการค้นหา เพื่อดูรายละเอียด</p>
           )}
         </section>
+{/* 4. Search Results */}
+        <section className="bg-white rounded-xl border p-4">
+          <h2 className="font-bold mb-3">Search Results / ผลการค้นหา</h2>
 
+          <div className="space-y-2">
+            {filteredWords.map((word) => (
+              <button
+                key={word.id}
+                onClick={() => setSelectedWord(word)}
+                className="w-full text-left border rounded-lg p-3 hover:bg-stone-100"
+              >
+                <div className="text-sm text-gray-500">#{word.id}</div>
+                <div className="font-bold">{word.meaning_th || "ไม่มีคำแปลไทย"}</div>
+                <div className="text-sm">
+                  {word.simplified} {word.traditional}
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
         {/* 5. Example Sentence */}
         <section className="bg-white rounded-xl border p-4">
           <h2 className="font-bold mb-3">Example Sentence / ตัวอย่างประโยค</h2>
