@@ -102,8 +102,8 @@ export default function Home() {
               <div className="text-2xl font-bold">{selectedWord.meaning_th}</div>
               <div>简体字: {selectedWord.simplified || "-"}</div>
               <div>繁體字: {selectedWord.traditional || "-"}</div>
-              <div>เสียงไหหลำ: {selectedWord.hainan_pronunciation || "-"}</div>
-              <div>พินอินไหหลำ: {selectedWord.hainan_pinyin || "-"}</div>
+              <div>เสียงไฮ้หน่ำ: {selectedWord.hainan_pronunciation || "-"}</div>
+              <div>พินอินไฮ้หน่ำ: {selectedWord.hainan_pinyin || "-"}</div>
 
               {selectedWord.hainan_audio && (
                 <audio
