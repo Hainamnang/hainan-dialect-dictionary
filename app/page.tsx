@@ -59,7 +59,19 @@ export default function Home() {
       return text.includes(search.toLowerCase());
     })
     .slice(0, 20);
+    useEffect(() => {
 
+    if (search.trim() !== "" && filteredWords.length > 0) {
+
+      setSelectedWord(filteredWords[0]);
+
+    } else {
+
+      setSelectedWord(null);
+
+    }
+
+  }, [search, filteredWords]);
   return (
     <main className="min-h-screen bg-stone-50 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -85,7 +97,7 @@ export default function Home() {
             value={search}
             onChange={(e) => {
   setSearch(e.target.value);
-  setSelectedWord(null);
+  
 }}
           />
         </section>
