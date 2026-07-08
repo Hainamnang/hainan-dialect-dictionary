@@ -17,6 +17,7 @@ type Word = {
   hainan_pronunciation: string | null;
   hainan_pinyin: string | null;
   hainan_audio: string | null;
+  note: string | null;
 };
 
 export default function Home() {
@@ -27,12 +28,12 @@ export default function Home() {
   useEffect(() => {
     async function loadWords() {
       const { data, error } = await supabase
-        .from("hainan_dictionary")
-        .select(
-          "id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio"
-        )
-        .lte("id", 295)
-        .order("sort_key", { ascending: true });
+  .from("hainan_dictionary")
+  .select(
+    "id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note"
+  )
+  .lte("sort_key", 295)
+  .order("sort_key", { ascending: true });
 
       if (error) {
         console.error(error);
@@ -59,19 +60,13 @@ export default function Home() {
       return text.includes(search.toLowerCase());
     })
     .slice(0, 20);
-    useEffect(() => {
-
-    if (search.trim() !== "" && filteredWords.length > 0) {
-
-      setSelectedWord(filteredWords[0]);
-
-    } else {
-
-      setSelectedWord(null);
-
-    }
-
-  }, [search, filteredWords]);
+useEffect(() => {
+  if (search.trim() !== "" && filteredWords.length > 0) {
+    setSelectedWord(filteredWords[0]);
+  } else {
+    setSelectedWord(null);
+  }
+}, [search]);
   return (
     <main className="min-h-screen bg-stone-50 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -105,29 +100,41 @@ export default function Home() {
         
 
         {/* 3. Vocabulary Detail */}
-        <section className="bg-white rounded-xl border p-4">
+        <section className="bg-amber-50 rounded-xl border border-amber-200 p-4">
           <h2 className="font-bold mb-3">Vocabulary Detail / รายละเอียดคำศัพท์</h2>
 
-          {selectedWord ? (
-            <div className="space-y-2">
-              <div className="text-sm text-gray-500">#{selectedWord.id}</div>
-              <div className="text-2xl font-bold">{selectedWord.meaning_th}</div>
-              <div>简体字: {selectedWord.simplified || "-"}</div>
-              <div>繁體字: {selectedWord.traditional || "-"}</div>
-              <div>เสียงไฮ้หน่ำ: {selectedWord.hainan_pronunciation || "-"}</div>
-              <div>พินอินไฮ้หน่ำ: {selectedWord.hainan_pinyin || "-"}</div>
+        {selectedWord ? (
+  <div className="space-y-2">
+    <div className="text-sm text-gray-500">#{selectedWord.id}</div>
+    <div className="text-2xl font-bold">{selectedWord.meaning_th}</div>
+    <div>简体字: {selectedWord.simplified || "-"}</div>
+    <div>繁體字: {selectedWord.traditional || "-"}</div>
+    <div>เสียงไฮ้หน่ำ: {selectedWord.hainan_pronunciation || "-"}</div>
+    <div>พินอินไฮ้หน่ำ: {selectedWord.hainan_pinyin || "-"}</div>
 
-              {selectedWord.hainan_audio && (
-                <audio
-                  controls
-                  className="mt-3"
-                  src={selectedWord.hainan_audio}
-                />
-              )}
-            </div>
-          ) : (
-            <p className="text-gray-500">คลิกคำศัพท์จากผลการค้นหา เพื่อดูรายละเอียด</p>
-          )}
+    {selectedWord.note && (
+      <div className="mt-4">
+        <div className="font-bold text-blue-700">หมายเหตุ :</div>
+        <hr className="my-2 border-gray-300" />
+        <div className="mt-2 pl-2">
+    {selectedWord.note}
+    </div>
+      </div>
+    )}
+
+    {selectedWord.hainan_audio && (
+      <audio
+        controls
+        className="mt-3"
+        src={selectedWord.hainan_audio}
+      />
+    )}
+  </div>
+) : (
+  <p className="text-gray-500">
+    คลิกคำศัพท์จากผลการค้นหา เพื่อดูรายละเอียด
+  </p>
+)}
         </section>
 {/* 4. Search Results */}
         <section className="bg-white rounded-xl border p-4">
@@ -138,7 +145,11 @@ export default function Home() {
               <button
                 key={word.id}
                 onClick={() => setSelectedWord(word)}
-                className="w-full text-left border rounded-lg p-3 hover:bg-stone-100"
+  className={`w-full text-left border rounded-lg p-3 transition ${
+  selectedWord?.id === word.id
+    ? "bg-orange-100 border-orange-400"
+    : "bg-white hover:bg-stone-100"
+}`}
               >
                 <div className="text-sm text-gray-500">#{word.id}</div>
                 <div className="font-bold">{word.meaning_th || "ไม่มีคำแปลไทย"}</div>
