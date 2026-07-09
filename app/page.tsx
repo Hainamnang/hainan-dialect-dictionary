@@ -18,6 +18,7 @@ type Word = {
   hainan_pinyin: string | null;
   hainan_audio: string | null;
   note: string | null;
+  example: string | null;
 };
 
 export default function Home() {
@@ -29,9 +30,7 @@ export default function Home() {
     async function loadWords() {
       const { data, error } = await supabase
   .from("hainan_dictionary")
-  .select(
-    "id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note"
-  )
+  .select("id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example")
   .lte("sort_key", 321)
   .order("sort_key", { ascending: true });
 
@@ -83,19 +82,26 @@ useEffect(() => {
           />
         </section>
 
-        {/* 2. Search */}
-        <section className="bg-white rounded-xl border p-4">
-          <h2 className="font-bold mb-3">Search / ค้นหาคำศัพท์</h2>
-          <input
-            className="border rounded-lg p-3 w-full"
-            placeholder="ค้นหาคำศัพท์..."
-            value={search}
-            onChange={(e) => {
-  setSearch(e.target.value);
-  
-}}
-          />
-        </section>
+       {/* 2. Search */}
+<section className="bg-white rounded-xl border p-4">
+  <h2 className="font-bold mb-3">Search / ค้นหาคำศัพท์</h2>
+
+  <div className="relative">
+    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">
+      🔍
+    </span>
+
+    <input
+      className="w-full rounded-lg border-2 border-orange-300 bg-orange-50 pl-12 pr-4 py-3 text-lg
+                 focus:border-orange-500 focus:bg-white focus:outline-none"
+      placeholder="ค้นหาคำศัพท์..."
+      value={search}
+      onChange={(e) => {
+        setSearch(e.target.value);
+      }}
+    />
+  </div>
+</section>
 
         
 
@@ -107,10 +113,33 @@ useEffect(() => {
   <div className="space-y-2">
     <div className="text-sm text-gray-500">#{selectedWord.id}</div>
     <div className="text-2xl font-bold">{selectedWord.meaning_th}</div>
-    <div>简体字: {selectedWord.simplified || "-"}</div>
-    <div>繁體字: {selectedWord.traditional || "-"}</div>
-    <div>เสียงไฮ้หน่ำ: {selectedWord.hainan_pronunciation || "-"}</div>
-    <div>พินอินไฮ้หน่ำ: {selectedWord.hainan_pinyin || "-"}</div>
+    <div>
+  <span className="text-gray-600">简体字:</span>
+  <span className="ml-2 text-3xl font-bold text-red-700">
+    {selectedWord.simplified || "-"}
+  </span>
+</div>
+
+<div>
+  <span className="text-gray-600">繁體字:</span>
+  <span className="ml-2 text-3xl font-bold text-red-700">
+    {selectedWord.traditional || "-"}
+  </span>
+</div>
+
+<div>
+  <span className="font-bold text-gray-700">เสียงไฮ้หน่ำ:</span>
+  <span className="ml-2 text-2xl font-bold text-blue-700">
+    {selectedWord.hainan_pronunciation || "-"}
+  </span>
+</div>
+
+<div>
+  <span className="font-bold text-gray-700">พินอินไฮ้หน่ำ:</span>
+  <span className="ml-2">
+    {selectedWord.hainan_pinyin || "-"}
+  </span>
+</div>
 
     {selectedWord.note && (
       <div className="mt-4">
@@ -121,7 +150,15 @@ useEffect(() => {
     </div>
       </div>
     )}
-
+    {selectedWord.example && (
+  <div className="mt-4">
+    <div className="font-bold text-green-700">Example / ตัวอย่าง :</div>
+    <hr className="my-2 border-gray-300" />
+    <div className="mt-2 pl-2">
+      {selectedWord.example}
+    </div>
+  </div>
+)}
     {selectedWord.hainan_audio && (
       <audio
         controls
