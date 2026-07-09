@@ -32,7 +32,7 @@ export default function Home() {
   .select(
     "id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note"
   )
-  .lte("sort_key", 295)
+  .lte("sort_key", 321)
   .order("sort_key", { ascending: true });
 
       if (error) {
