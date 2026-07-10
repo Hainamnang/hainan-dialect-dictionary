@@ -161,9 +161,9 @@ useEffect(() => {
       <div className="mt-4">
         <div className="font-bold text-blue-700">หมายเหตุ :</div>
         <hr className="my-2 border-gray-300" />
-        <div className="mt-2 pl-2">
-    {selectedWord.note}
-    </div>
+        <div className="mt-2 pl-5 whitespace-pre-wrap leading-7">
+          {selectedWord.note}
+        </div>
       </div>
     )}
     {selectedWord.example && (
@@ -178,7 +178,7 @@ useEffect(() => {
     {selectedWord.hainan_audio && (
       <audio
         controls
-        className="mt-3"
+        className="mt-6"
         src={selectedWord.hainan_audio}
       />
     )}
