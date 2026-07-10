@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 
@@ -25,6 +25,18 @@ export default function Home() {
   const [words, setWords] = useState<Word[]>([]);
   const [search, setSearch] = useState("");
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
+  const vocabularyDetailRef = useRef<HTMLElement | null>(null);
+
+const handleSelectWord = (word: Word) => {
+  setSelectedWord(word);
+
+  requestAnimationFrame(() => {
+    vocabularyDetailRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  });
+};
 
   useEffect(() => {
     async function loadWords() {
@@ -59,13 +71,14 @@ export default function Home() {
       return text.includes(search.toLowerCase());
     })
     .slice(0, 20);
+    
 useEffect(() => {
   if (search.trim() !== "" && filteredWords.length > 0) {
     setSelectedWord(filteredWords[0]);
   } else {
     setSelectedWord(null);
   }
-}, [search]);
+}, [search, words]);
   return (
     <main className="min-h-screen bg-stone-50 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -106,7 +119,10 @@ useEffect(() => {
         
 
         {/* 3. Vocabulary Detail */}
-        <section className="bg-amber-50 rounded-xl border border-amber-200 p-4">
+<section
+  ref={vocabularyDetailRef}
+  className="scroll-mt-4 bg-amber-50 rounded-xl border border-amber-200 p-4"
+>
           <h2 className="font-bold mb-3">Vocabulary Detail / รายละเอียดคำศัพท์</h2>
 
         {selectedWord ? (
@@ -181,7 +197,7 @@ useEffect(() => {
             {filteredWords.map((word) => (
               <button
                 key={word.id}
-                onClick={() => setSelectedWord(word)}
+                onClick={() => handleSelectWord(word)}
   className={`w-full text-left border rounded-lg p-3 transition ${
   selectedWord?.id === word.id
     ? "bg-orange-100 border-orange-400"
