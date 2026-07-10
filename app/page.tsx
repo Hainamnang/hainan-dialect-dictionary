@@ -31,7 +31,7 @@ export default function Home() {
       const { data, error } = await supabase
   .from("hainan_dictionary")
   .select("id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example")
-  .lte("sort_key", 321)
+  .lte("sort_key", 330)
   .order("sort_key", { ascending: true });
 
       if (error) {
