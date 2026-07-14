@@ -43,7 +43,7 @@ const handleSelectWord = (word: Word) => {
       const { data, error } = await supabase
   .from("hainan_dictionary")
   .select("id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example")
-  .lte("sort_key", 353)
+  .lte("sort_key", 366)
   .order("sort_key", { ascending: true });
 
       if (error) {
