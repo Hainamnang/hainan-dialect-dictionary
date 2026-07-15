@@ -191,7 +191,20 @@ useEffect(() => {
         </section>
 {/* 4. Search Results */}
         <section className="bg-white rounded-xl border p-4">
-          <h2 className="font-bold mb-3">Search Results / ผลการค้นหา</h2>
+          <h2 className="font-bold mb-2">
+              Search Results / ผลการค้นหาเพิ่มเติม
+          </h2>
+
+          <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+            <p className="text-base font-semibold text-black">
+               ► คลิกเลือกคำศัพท์แต่ละคำในช่องด้านล่างนี้
+            </p>
+
+            <p className="mt-1 text-base text-black">
+               เพื่อดูคำแปล คำอ่านด้วยภาษาไทย พินอินไฮ้หน่ำ
+               ฟังเสียงพูดภาษาไฮ้หน่ำ ฯลฯ
+            </p>
+      </div>
 
           <div className="space-y-2">
             {filteredWords.map((word) => (
