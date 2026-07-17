@@ -130,14 +130,14 @@ useEffect(() => {
     <div className="text-sm text-gray-500">#{selectedWord.id}</div>
     <div className="text-2xl font-bold">{selectedWord.meaning_th}</div>
     <div>
-  <span className="text-gray-600">简体字:</span>
+  <span className="text-gray-600">อักษรจีนตัวย่อ (简体字):</span>
   <span className="ml-2 text-3xl font-bold text-red-700">
     {selectedWord.simplified || "-"}
   </span>
 </div>
 
 <div>
-  <span className="text-gray-600">繁體字:</span>
+  <span className="text-gray-600">อักษรจีนตัวเต็ม (繁體字):</span>
   <span className="ml-2 text-3xl font-bold text-red-700">
     {selectedWord.traditional || "-"}
   </span>
