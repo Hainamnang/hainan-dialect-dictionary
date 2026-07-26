@@ -11,6 +11,7 @@ const supabase = createClient(
 
 type Word = {
   id: number;
+  sort_key: number | null;
   meaning_th: string | null;
   simplified: string | null;
   traditional: string | null;
@@ -39,38 +40,53 @@ const handleSelectWord = (word: Word) => {
 };
 
   useEffect(() => {
-    async function loadWords() {
-      const { data, error } = await supabase
-  .from("hainan_dictionary")
-  .select("id, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example")
-  .lte("sort_key", 427)
-  .order("sort_key", { ascending: true });
+  async function loadWords() {
+    const { data, error } = await supabase
+      .from("hainan_dictionary")
+      .select(
+        "id, sort_key, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example"
+      )
+      .lte("sort_key", 427)
+      .order("sort_key", { ascending: true });
 
-      if (error) {
-        console.error(error);
-      } else {
-        setWords(data || []);
-      }
+    if (error) {
+      console.error("Supabase error:", error);
+    } else {
+      setWords(data || []);
     }
+  }
 
-    loadWords();
-  }, []);
+  loadWords();
+}, []);
 
-  const filteredWords = words
-    .filter((word) => {
-      const text = [
-        word.meaning_th,
-        word.simplified,
-        word.traditional,
-        word.hainan_pronunciation,
-        word.hainan_pinyin,
-      ]
-        .join(" ")
-        .toLowerCase();
+  const normalizeText = (value: string) =>
+  value
+    .normalize("NFC")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .trim()
+    .toLowerCase();
 
-      return text.includes(search.toLowerCase());
-    })
-    .slice(0, 20);
+const normalizedSearch = normalizeText(search);
+
+const filteredWords =
+  normalizedSearch === ""
+    ? []
+    : words
+        .filter((word) => {
+          const text = [
+            word.meaning_th,
+            word.simplified,
+            word.traditional,
+            word.hainan_pronunciation,
+            word.hainan_pinyin,
+          ]
+            .filter(Boolean)
+            .map((value) => normalizeText(String(value)))
+            .join(" ");
+
+          return text.includes(normalizedSearch);
+        })
+        .slice(0, 20);
     
 useEffect(() => {
   if (search.trim() !== "" && filteredWords.length > 0) {
