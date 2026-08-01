@@ -86,6 +86,18 @@ const filteredWords =
 
           return text.includes(normalizedSearch);
         })
+        .sort((a, b) => {
+          const aMeaning = normalizeText(String(a.meaning_th || ""));
+          const bMeaning = normalizeText(String(b.meaning_th || ""));
+
+          if (aMeaning === normalizedSearch && bMeaning !== normalizedSearch)
+            return -1;
+
+          if (bMeaning === normalizedSearch && aMeaning !== normalizedSearch)
+            return 1;
+
+          return 0;
+        })
         .slice(0, 20);
     
 useEffect(() => {
