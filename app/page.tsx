@@ -46,7 +46,7 @@ const handleSelectWord = (word: Word) => {
       .select(
         "id, sort_key, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example"
       )
-      .lte("sort_key", 453)
+      .lte("sort_key", 466)
       .order("sort_key", { ascending: true });
 
     if (error) {
