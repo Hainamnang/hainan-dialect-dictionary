@@ -90,13 +90,21 @@ const filteredWords =
           const aMeaning = normalizeText(String(a.meaning_th || ""));
           const bMeaning = normalizeText(String(b.meaning_th || ""));
 
-          if (aMeaning === normalizedSearch && bMeaning !== normalizedSearch)
-            return -1;
+          const getRank = (meaning: string) => {
+            if (meaning === normalizedSearch) return 1;
+            if (meaning.startsWith(normalizedSearch)) return 2;
+            if (meaning.includes(normalizedSearch)) return 3;
+            return 4;
+          };
 
-          if (bMeaning === normalizedSearch && aMeaning !== normalizedSearch)
-            return 1;
+          const rankA = getRank(aMeaning);
+          const rankB = getRank(bMeaning);
 
-          return 0;
+          if (rankA !== rankB) {
+            return rankA - rankB;
+          }
+
+          return (a.sort_key ?? 999999) - (b.sort_key ?? 999999);
         })
         .slice(0, 20);
     
