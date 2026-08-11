@@ -557,12 +557,12 @@ const displayedWord =
         {/* 8. Future sections */}
         <section id="pinyin-lessons" className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5">
           <h2 className="text-xl font-bold">Pinyin Lessons</h2>
-          <p className="mt-2 text-gray-700">พื้นที่สำหรับหลักการอ่านและระบบพินอินภาษาไหหลำ</p>
+          <p className="mt-2 text-gray-700">พื้นที่สำหรับหลักการอ่านและระบบพินอินภาษาไฮ้หน่ำ</p>
         </section>
 
         <section id="music" className="scroll-mt-24 rounded-xl border border-red-200 bg-red-100 p-5">
           <h2 className="text-xl font-bold">Music</h2>
-          <p className="mt-2 text-gray-700">พื้นที่สำหรับเพลงและเสียงดนตรีภาษาไหหลำ</p>
+          <p className="mt-2 text-gray-700">พื้นที่สำหรับเพลงและเสียงดนตรีภาษาไฮ้หน่ำ</p>
         </section>
           </div>
 
