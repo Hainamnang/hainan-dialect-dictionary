@@ -266,12 +266,14 @@ const displayedWord =
       ? selectedWord
       : filteredWords[0];
 
+  const hasSearch = normalizedSearch !== "";
+
   return (
-    <main className="min-h-screen bg-stone-50 p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <main className="min-h-screen bg-stone-50 px-3 py-4 sm:px-6 sm:py-6">
+      <div className="mx-auto max-w-7xl">
 
         {/* 1. Header */}
-        <section className="bg-white rounded-xl border p-4">
+        <section id="home" className="scroll-mt-24 rounded-xl border bg-white p-3 sm:p-4">
           <Image
             src="/heading.jpg"
             alt="Hainanese Dialect Dictionary"
@@ -282,9 +284,35 @@ const displayedWord =
           />
         </section>
 
-       {/* 2. Search */}
-<section className="bg-white rounded-xl border p-4">
-  <h2 className="font-bold mb-3">Search / ค้นหาคำศัพท์</h2>
+        {/* 2. Main menu */}
+        <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-2 shadow-sm">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            {[
+              ["Home", "#home"],
+              ["Dictionary", "#dictionary"],
+              ["Hainan Pinyin", "#hainan-pinyin"],
+              ["Article", "#articles"],
+              ["Video", "#videos"],
+              ["Music", "#music"],
+            ].map(([label, href]) => (
+              <a
+                key={label}
+                href={href}
+                className="rounded-lg px-3 py-3 text-center font-bold text-white transition hover:bg-purple-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        </nav>
+
+        <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="min-w-0 space-y-6">
+       {/* 3. Search */}
+<section id="dictionary" className="scroll-mt-24 rounded-xl border bg-white p-4">
+  <h2 className="mb-3 font-bold">
+    🔍 Search / ค้นหาคำศัพท์ --&gt; พิมพ์คำที่ต้องการค้นในช่องด้านล่าง ▼
+  </h2>
 
   <div className="relative">
     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl">
@@ -305,7 +333,8 @@ const displayedWord =
 
         
 
-        {/* 3. Vocabulary Detail */}
+        {/* 4. Vocabulary Detail — hidden until a search begins */}
+        {hasSearch ? (
 <section
   ref={vocabularyDetailRef}
   className="scroll-mt-4 bg-amber-50 rounded-xl border border-amber-200 p-4"
@@ -376,25 +405,18 @@ const displayedWord =
   </p>
 )}
         </section>
-{/* 4. Search Results */}
+        ) : null}
+{/* 5. Search Results — hidden until a search begins */}
+        {hasSearch ? (
         <section className="bg-white rounded-xl border p-4">
-          <h2 className="font-bold mb-2">
-              Search Results / ผลการค้นหาเพิ่มเติม
+          <h2 className="mb-4 font-bold">
+            Search Results / ค้นหาเพิ่มเติม --&gt; คลิกเลือกคำอื่นๆ ที่ปรากฏด้านล่าง ▼
           </h2>
 
-          <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
-            <p className="text-base font-semibold text-black">
-               ► คลิกเลือกคำศัพท์แต่ละคำในช่องด้านล่างนี้
-            </p>
-
-            <p className="mt-1 text-base text-black">
-               เพื่อดูคำแปล คำอ่านด้วยภาษาไทย พินอินไฮ้หน่ำ
-               ฟังเสียงพูดภาษาไฮ้หน่ำ ฯลฯ
-            </p>
-      </div>
-
           <div className="space-y-2">
-            {filteredWords.map((word) => (
+            {filteredWords.length === 0 ? (
+              <p className="rounded-lg bg-stone-50 p-4 text-gray-600">ไม่พบคำศัพท์ที่ตรงกับคำค้นนี้</p>
+            ) : filteredWords.map((word) => (
               <button
                 key={word.id}
                 onClick={() => handleSelectWord(word)}
@@ -413,31 +435,33 @@ const displayedWord =
             ))}
           </div>
         </section>
-        {/* 5. Articles / Videos */}
-        <section className="bg-white rounded-xl border p-4 space-y-6">
+        ) : null}
+
+        {/* 6. Articles */}
+        <section id="articles" className="scroll-mt-24 rounded-xl border bg-white p-4">
           <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
             <h2 className="font-bold mb-4">Articles / บทความ</h2>
 
             {articles.length === 0 ? (
               <p className="text-gray-500">ยังไม่มีบทความที่เผยแพร่ในขณะนี้</p>
             ) : (
-              <div className="space-y-3">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {articles.map((article) => (
                   <button
                     key={article.id}
                     onClick={() => setSelectedArticle(article)}
-                    className={`w-full rounded-lg border p-3 text-left transition ${
+                    className={`h-full w-full rounded-lg border p-3 text-left transition ${
                       selectedArticle?.id === article.id
                         ? "border-orange-400 bg-orange-50"
                         : "border-stone-200 bg-white hover:bg-stone-100"
                     }`}
                   >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start">
+                    <div className="flex h-full flex-col gap-3">
                       {article.cover_image_url ? (
                         <img
                           src={article.cover_image_url}
                           alt={article.title || "Article cover"}
-                          className="h-24 w-full rounded-md object-cover md:w-32"
+                          className="h-36 w-full rounded-md object-cover"
                         />
                       ) : null}
                       <div className="flex-1">
@@ -488,14 +512,17 @@ const displayedWord =
               </div>
             ) : null}
           </div>
+        </section>
 
+        {/* 7. Videos */}
+        <section id="videos" className="scroll-mt-24 rounded-xl border bg-white p-4">
           <div className="rounded-xl border border-stone-200 bg-stone-50 p-4">
             <h2 className="font-bold mb-4">Videos / วิดีโอ</h2>
 
             {videos.length === 0 ? (
               <p className="text-gray-500">ยังไม่มีวิดีโอที่เผยแพร่ในขณะนี้</p>
             ) : (
-              <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {videos.map((video) => {
                   if (!video.youtube_video_id?.trim()) {
                     return null;
@@ -527,13 +554,45 @@ const displayedWord =
           </div>
         </section>
 
-        {/* 6. Footer */}
-        <footer className="text-center text-sm text-gray-500 py-6">
+        {/* 8. Future sections */}
+        <section id="hainan-pinyin" className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5">
+          <h2 className="text-xl font-bold">Hainan Pinyin</h2>
+          <p className="mt-2 text-gray-700">พื้นที่สำหรับหลักการอ่านและระบบพินอินภาษาไหหลำ</p>
+        </section>
+
+        <section id="music" className="scroll-mt-24 rounded-xl border border-red-200 bg-red-100 p-5">
+          <h2 className="text-xl font-bold">Music</h2>
+          <p className="mt-2 text-gray-700">พื้นที่สำหรับเพลงและเสียงดนตรีภาษาไหหลำ</p>
+        </section>
+          </div>
+
+          {/* Right sidebar */}
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            <section className="min-h-36 rounded-xl bg-blue-500 p-5 text-white">
+              <h2 className="text-lg font-bold">Link</h2>
+              <p className="mt-2 text-sm text-blue-50">พื้นที่สำหรับลิงก์ที่เกี่ยวข้อง</p>
+            </section>
+            <section className="min-h-52 rounded-xl bg-blue-500 p-5 text-white">
+              <h2 className="text-lg font-bold">News</h2>
+              <p className="mt-2 text-sm text-blue-50">พื้นที่สำหรับข่าวสารและประกาศ</p>
+            </section>
+            <section className="min-h-52 rounded-xl bg-blue-700 p-5 text-white">
+              <h2 className="text-lg font-bold">Poem and Story</h2>
+              <p className="mt-2 text-sm text-blue-50">พื้นที่สำหรับบทกวีและเรื่องเล่า</p>
+            </section>
+          </aside>
+        </div>
+
+        {/* 9. Contact and footer */}
+        <section id="contact" className="mt-6 rounded-xl bg-pink-600 p-5 text-white">
+          <h2 className="text-xl font-bold">Contact Us</h2>
+          <p className="mt-2 text-pink-50">พื้นที่สำหรับข้อมูลติดต่อและข้อเสนอแนะเกี่ยวกับพจนานุกรม</p>
+        </section>
+
+        <footer className="py-6 text-center text-sm text-gray-500">
           Hainanese Dialect Dictionary — Version 0.1
         </footer>
-
       </div>
     </main>
   );
 }
-
