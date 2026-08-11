@@ -139,6 +139,7 @@ export default function Home() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [music, setMusic] = useState<Music[]>([]);
   const [news, setNews] = useState<News[]>([]);
+  const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const vocabularyDetailRef = useRef<HTMLElement | null>(null);
 
 const handleSelectWord = (word: Word) => {
@@ -319,6 +320,27 @@ const handleSearchChange = (value: string) => {
     loadNews();
   }, []);
 
+  useEffect(() => {
+    if (!selectedNews) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedNews(null);
+      }
+    };
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedNews]);
+
   const normalizeText = (value: string) =>
   value
     .normalize("NFC")
@@ -376,6 +398,15 @@ const displayedWord =
       : filteredWords[0];
 
   const hasSearch = normalizedSearch !== "";
+  const selectedNewsImageUrl = selectedNews?.image_url
+    ? getSafeSourceUrl(selectedNews.image_url)
+    : null;
+  const selectedNewsSourceUrl = selectedNews?.source_url
+    ? getSafeSourceUrl(selectedNews.source_url)
+    : null;
+  const selectedNewsVideoId = selectedNews?.video_url
+    ? getYouTubeVideoId(selectedNews.video_url)
+    : null;
 
   return (
     <main className="min-h-screen bg-stone-50 px-3 py-4 sm:px-6 sm:py-6">
@@ -760,8 +791,6 @@ const displayedWord =
                 <div className="mt-3 space-y-4">
                   {news.map((item) => {
                     const safeImageUrl = item.image_url ? getSafeSourceUrl(item.image_url) : null;
-                    const safeSourceUrl = item.source_url ? getSafeSourceUrl(item.source_url) : null;
-                    const youtubeVideoId = item.video_url ? getYouTubeVideoId(item.video_url) : null;
 
                     return (
                       <article key={item.id} className="overflow-hidden rounded-lg bg-white text-gray-900 shadow-sm">
@@ -774,40 +803,18 @@ const displayedWord =
                           />
                         ) : null}
 
-                        {youtubeVideoId ? (
-                          <div className="aspect-video w-full bg-black">
-                            <iframe
-                              src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
-                              title={`วิดีโอประกอบข่าว: ${item.title}`}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                              allowFullScreen
-                              loading="lazy"
-                              referrerPolicy="strict-origin-when-cross-origin"
-                              className="h-full w-full"
-                            />
-                          </div>
-                        ) : null}
-
                         <div className="p-3">
                           <h3 className="font-bold leading-6">{item.title}</h3>
                           {item.summary ? (
                             <p className="mt-1 whitespace-pre-wrap text-sm leading-5 text-gray-600">{item.summary}</p>
                           ) : null}
-                          {item.content ? (
-                            <p className="mt-3 whitespace-pre-wrap border-t border-gray-100 pt-3 text-sm leading-6 text-gray-700">
-                              {item.content}
-                            </p>
-                          ) : null}
-                          {safeSourceUrl ? (
-                            <a
-                              href={safeSourceUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="mt-3 inline-flex text-sm font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-                            >
-                              อ่านจากแหล่งข่าวต้นฉบับ
-                            </a>
-                          ) : null}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedNews(item)}
+                            className="mt-3 rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white transition hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                          >
+                            อ่านเพิ่มเติม
+                          </button>
                         </div>
                       </article>
                     );
@@ -832,6 +839,78 @@ const displayedWord =
           Hainanese Dialect Dictionary — Version 0.1
         </footer>
       </div>
+
+      {selectedNews ? (
+        <div
+          role="presentation"
+          onClick={() => setSelectedNews(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-3 sm:p-6"
+        >
+          <article
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="news-dialog-title"
+            onClick={(event) => event.stopPropagation()}
+            className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white shadow-2xl"
+          >
+            <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white px-4 py-3 sm:px-6">
+              <h2 id="news-dialog-title" className="text-lg font-bold text-gray-900 sm:text-xl">
+                {selectedNews.title}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setSelectedNews(null)}
+                aria-label="ปิดข่าว"
+                className="shrink-0 rounded-lg bg-gray-100 px-3 py-2 font-bold text-gray-700 hover:bg-gray-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+              >
+                ปิด ✕
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-6">
+              {selectedNewsImageUrl ? (
+                <img
+                  src={selectedNewsImageUrl}
+                  alt={selectedNews.image_alt || selectedNews.title}
+                  className="max-h-[460px] w-full rounded-lg object-contain"
+                />
+              ) : null}
+
+              {selectedNewsVideoId ? (
+                <div className={`${selectedNewsImageUrl ? "mt-5" : ""} aspect-video w-full overflow-hidden rounded-lg bg-black`}>
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${selectedNewsVideoId}`}
+                    title={`วิดีโอประกอบข่าว: ${selectedNews.title}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    className="h-full w-full"
+                  />
+                </div>
+              ) : null}
+
+              {selectedNews.summary ? (
+                <p className="mt-5 whitespace-pre-wrap text-lg leading-7 text-gray-600">{selectedNews.summary}</p>
+              ) : null}
+              {selectedNews.content ? (
+                <p className="mt-5 whitespace-pre-wrap border-t border-gray-200 pt-5 leading-8 text-gray-800">
+                  {selectedNews.content}
+                </p>
+              ) : null}
+              {selectedNewsSourceUrl ? (
+                <a
+                  href={selectedNewsSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex rounded-lg bg-blue-700 px-4 py-2 font-bold text-white transition hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                >
+                  อ่านจากแหล่งข่าวต้นฉบับ
+                </a>
+              ) : null}
+            </div>
+          </article>
+        </div>
+      ) : null}
     </main>
   );
 }
