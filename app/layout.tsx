@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Hainanese Dialect Dictionary",
-  description: "พจนานุกรมภาษาไหหลำ–ไทย พร้อมบทความ วิดีโอ และสารคดี",
+  description: "พจนานุกรมภาษาไฮ้หน่ำ–ไทย พร้อมบทความ วิดีโอ และสารคดี",
 };
 
 export default function RootLayout({
