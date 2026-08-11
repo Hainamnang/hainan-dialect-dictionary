@@ -290,7 +290,7 @@ const displayedWord =
             {[
               ["Home", "#home"],
               ["Dictionary", "#dictionary"],
-              ["Hainan Pinyin", "#hainan-pinyin"],
+              ["Pinyin Lessons", "#pinyin-lessons"],
               ["Article", "#articles"],
               ["Video", "#videos"],
               ["Music", "#music"],
@@ -555,8 +555,8 @@ const displayedWord =
         </section>
 
         {/* 8. Future sections */}
-        <section id="hainan-pinyin" className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5">
-          <h2 className="text-xl font-bold">Hainan Pinyin</h2>
+        <section id="pinyin-lessons" className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5">
+          <h2 className="text-xl font-bold">Pinyin Lessons</h2>
           <p className="mt-2 text-gray-700">พื้นที่สำหรับหลักการอ่านและระบบพินอินภาษาไหหลำ</p>
         </section>
 
