@@ -76,6 +76,20 @@ type Music = {
   created_at: string;
 };
 
+type News = {
+  id: number;
+  title: string;
+  summary: string | null;
+  content: string | null;
+  image_url: string | null;
+  image_alt: string | null;
+  video_url: string | null;
+  source_url: string | null;
+  sort_key: number;
+  is_published: boolean;
+  created_at: string;
+};
+
 const getSafeSourceUrl = (sourceUrl: string) => {
   try {
     const url = new URL(sourceUrl);
@@ -124,6 +138,7 @@ export default function Home() {
   const [articleImages, setArticleImages] = useState<ArticleImage[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [music, setMusic] = useState<Music[]>([]);
+  const [news, setNews] = useState<News[]>([]);
   const vocabularyDetailRef = useRef<HTMLElement | null>(null);
 
 const handleSelectWord = (word: Word) => {
@@ -282,6 +297,26 @@ const handleSearchChange = (value: string) => {
     }
 
     loadMusic();
+  }, []);
+
+  useEffect(() => {
+    async function loadNews() {
+      const { data, error } = await supabase
+        .from("news")
+        .select(
+          "id, title, summary, content, image_url, image_alt, video_url, source_url, sort_key, is_published, created_at"
+        )
+        .eq("is_published", true)
+        .order("sort_key", { ascending: true });
+
+      if (error) {
+        logSupabaseError("loadNews", error);
+      } else {
+        setNews((data as News[]) || []);
+      }
+    }
+
+    loadNews();
   }, []);
 
   const normalizeText = (value: string) =>
@@ -716,9 +751,69 @@ const displayedWord =
               <h2 className="text-lg font-bold">Link</h2>
               <p className="mt-2 text-sm text-blue-50">พื้นที่สำหรับลิงก์ที่เกี่ยวข้อง</p>
             </section>
-            <section className="min-h-52 rounded-xl bg-blue-500 p-5 text-white">
-              <h2 className="text-lg font-bold">News</h2>
-              <p className="mt-2 text-sm text-blue-50">พื้นที่สำหรับข่าวสารและประกาศ</p>
+            <section id="news" className="min-h-52 rounded-xl bg-blue-500 p-4 text-white">
+              <h2 className="text-lg font-bold">News / ข่าวสาร</h2>
+
+              {news.length === 0 ? (
+                <p className="mt-2 text-sm text-blue-50">ยังไม่มีข่าวที่เผยแพร่ในขณะนี้</p>
+              ) : (
+                <div className="mt-3 space-y-4">
+                  {news.map((item) => {
+                    const safeImageUrl = item.image_url ? getSafeSourceUrl(item.image_url) : null;
+                    const safeSourceUrl = item.source_url ? getSafeSourceUrl(item.source_url) : null;
+                    const youtubeVideoId = item.video_url ? getYouTubeVideoId(item.video_url) : null;
+
+                    return (
+                      <article key={item.id} className="overflow-hidden rounded-lg bg-white text-gray-900 shadow-sm">
+                        {safeImageUrl ? (
+                          <img
+                            src={safeImageUrl}
+                            alt={item.image_alt || item.title}
+                            loading="lazy"
+                            className="h-36 w-full object-cover"
+                          />
+                        ) : null}
+
+                        {youtubeVideoId ? (
+                          <div className="aspect-video w-full bg-black">
+                            <iframe
+                              src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}`}
+                              title={`วิดีโอประกอบข่าว: ${item.title}`}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                              loading="lazy"
+                              referrerPolicy="strict-origin-when-cross-origin"
+                              className="h-full w-full"
+                            />
+                          </div>
+                        ) : null}
+
+                        <div className="p-3">
+                          <h3 className="font-bold leading-6">{item.title}</h3>
+                          {item.summary ? (
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-5 text-gray-600">{item.summary}</p>
+                          ) : null}
+                          {item.content ? (
+                            <p className="mt-3 whitespace-pre-wrap border-t border-gray-100 pt-3 text-sm leading-6 text-gray-700">
+                              {item.content}
+                            </p>
+                          ) : null}
+                          {safeSourceUrl ? (
+                            <a
+                              href={safeSourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-3 inline-flex text-sm font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                            >
+                              อ่านจากแหล่งข่าวต้นฉบับ
+                            </a>
+                          ) : null}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
             </section>
             <section className="min-h-52 rounded-xl bg-blue-700 p-5 text-white">
               <h2 className="text-lg font-bold">Poem and Story</h2>
