@@ -425,8 +425,8 @@ const displayedWord =
         </section>
 
         {/* 2. Main menu */}
-        <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-2 shadow-sm">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-1 shadow-sm">
+          <div className="grid grid-cols-6 gap-0">
             {[
               ["Home", "#home"],
               ["Dictionary", "#dictionary"],
@@ -438,7 +438,7 @@ const displayedWord =
               <a
                 key={label}
                 href={href}
-                className="rounded-lg px-3 py-3 text-center font-bold text-white transition hover:bg-purple-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className="px-1 py-1 text-center text-[12px] leading-none font-bold text-white transition hover:bg-purple-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 {label}
               </a>
