@@ -426,7 +426,7 @@ const displayedWord =
 
         {/* 2. Main menu */}
         <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-1 shadow-sm">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between sm:justify-center sm:gap-10">
             {[
               ["Home", "#home"],
               ["Dictionary", "#dictionary"],
