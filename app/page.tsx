@@ -426,11 +426,11 @@ const displayedWord =
 
         {/* 2. Main menu */}
         <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-1 shadow-sm">
-          <div className="grid grid-cols-6 gap-0">
+          <div className="flex items-center justify-between">
             {[
               ["Home", "#home"],
               ["Dictionary", "#dictionary"],
-              ["Pinyin Lessons", "#pinyin-lessons"],
+              ["Pinyin", "#pinyin-lessons"],
               ["Article", "#articles"],
               ["Video", "#videos"],
               ["Music", "#music"],
