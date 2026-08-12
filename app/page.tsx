@@ -601,20 +601,30 @@ const displayedWord =
                         <img
                           src={article.cover_image_url}
                           alt={article.title || "Article cover"}
-                          className="h-36 w-full rounded-md object-cover"
+                          className="w-full rounded-md"
+                          style={{
+                            height: "160px",
+                            objectFit: "contain",
+                }}
                         />
                       ) : null}
                       <div className="flex-1">
-                        <div className="font-semibold text-gray-900">{article.title || "ไม่มีหัวข้อ"}</div>
-                        {article.summary ? (
-                          <p className="mt-1 text-sm text-gray-600">{article.summary}</p>
-                        ) : null}
-                        {article.published_at ? (
-                          <p className="mt-2 text-xs text-gray-500">
-                            {new Date(article.published_at).toLocaleDateString("th-TH")}
-                          </p>
-                        ) : null}
-                      </div>
+                         <div className="font-semibold text-gray-900">{article.title || "ไม่มีหัวข้อ"}</div>
+
+                         {article.summary ? (
+                              <p className="mt-1 text-sm text-gray-600">{article.summary}</p>
+                         ) : null}
+
+                      {article.published_at ? (
+                         <p className="mt-2 text-xs text-gray-500">
+                              {new Date(article.published_at).toLocaleDateString("th-TH")}
+                         </p>
+                     ) : null}
+
+  <div className="mt-3 inline-flex rounded-md bg-purple-700 px-4 py-2 text-sm font-bold text-white">
+    เปิดอ่านบทความ
+  </div>
+</div>
                     </div>
                   </button>
                 ))}
@@ -625,9 +635,18 @@ const displayedWord =
               <div className="mt-4 rounded-lg border border-stone-200 bg-white p-4">
                 <h3 className="font-semibold text-gray-900">{selectedArticle.title || "บทความ"}</h3>
                 <div
-                  className="prose prose-sm mt-3 max-w-none text-gray-700"
-                  dangerouslySetInnerHTML={{ __html: selectedArticle.content || "" }}
-                />
+                  className="mt-3 text-gray-700"
+                  style={{ whiteSpace: "pre-wrap" }}
+            >
+                  {selectedArticle.content || ""}
+            </div>
+                <button
+                    type="button"
+                    onClick={() => setSelectedArticle(null)}
+                    className="mt-4 rounded-md border border-stone-300 px-3 py-2 text-sm text-gray-700 hover:bg-stone-50"
+                  >
+                    ปิดบทความ
+                  </button>
 
                 {articleImages.length > 0 ? (
                   <div className="mt-6 grid gap-4 md:grid-cols-2">
