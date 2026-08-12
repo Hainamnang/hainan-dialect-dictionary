@@ -709,7 +709,7 @@ const displayedWord =
               ยังไม่มีเพลงที่เผยแพร่ในขณะนี้
             </p>
           ) : (
-            <div className="mt-4 grid gap-4 xl:grid-cols-2">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {music.map((song) => {
                 const safeSourceUrl = getSafeSourceUrl(song.source_url);
                 const youtubeVideoId = getYouTubeVideoId(song.source_url);
