@@ -75,6 +75,26 @@ type Music = {
   is_published: boolean;
   created_at: string;
 };
+type PinyinLesson = {
+  id: number;
+  title: string;
+  title_chinese: string | null;
+  content: string | null;
+  sort_key: number;
+  is_published: boolean;
+  created_at: string;
+};
+
+type PinyinLessonMedia = {
+  id: number;
+  lesson_id: number;
+  media_type: "image" | "video" | "audio";
+  media_url: string;
+  alt_text: string | null;
+  caption: string | null;
+  sort_key: number;
+  created_at: string;
+};
 
 type News = {
   id: number;
@@ -90,7 +110,12 @@ type News = {
   created_at: string;
 };
 
-type ShareContentType = "article" | "video" | "music" | "news";
+type ShareContentType =
+  | "article"
+  | "video"
+  | "music"
+  | "news"
+  | "pinyin";
 
 const getSafeSourceUrl = (sourceUrl: string) => {
   try {
@@ -145,11 +170,16 @@ export default function Home() {
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [shareMessage, setShareMessage] = useState("");
   const vocabularyDetailRef = useRef<HTMLElement | null>(null);
+  const [pinyinLessons, setPinyinLessons] = useState<PinyinLesson[]>([]);
+  const [selectedPinyinLesson, setSelectedPinyinLesson] =
+      useState<PinyinLesson | null>(null);
+  const [pinyinLessonMedia, setPinyinLessonMedia] =
+      useState<PinyinLessonMedia[]>([]);
 
-const handleSelectWord = (word: Word) => {
-  setSelectedWord(word);
+  const handleSelectWord = (word: Word) => {
+      setSelectedWord(word);
 
-  requestAnimationFrame(() => {
+     requestAnimationFrame(() => {
     vocabularyDetailRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
@@ -371,7 +401,7 @@ const handleCopyContentLink = async (
     if (!requestedWord) {
       return;
     }
-
+    
     setLinkedWordId(requestedWord.id);
     setSelectedWord(requestedWord);
     setSearch(
@@ -493,7 +523,7 @@ const handleCopyContentLink = async (
     loadMusic();
   }, []);
 
-  useEffect(() => {
+    useEffect(() => {
     async function loadNews() {
       const { data, error } = await supabase
         .from("news")
@@ -512,10 +542,91 @@ const handleCopyContentLink = async (
 
     loadNews();
   }, []);
+    useEffect(() => {
+    async function loadPinyinLessons() {
+      const { data, error } = await supabase
+        .from("pinyin_lessons")
+        .select("*")
+        .eq("is_published", true)
+        .order("sort_key", { ascending: true })
+        .order("id", { ascending: true });
+
+      if (error) {
+        logSupabaseError("loadPinyinLessons", error);
+        return;
+      }
+
+      setPinyinLessons((data ?? []) as PinyinLesson[]);
+    }
+
+        loadPinyinLessons();
+  }, []);
 
   useEffect(() => {
-    if (!selectedNews) {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("content") !== "pinyin") {
       return;
+    }
+
+    const requestedId = Number(params.get("id"));
+
+    if (
+      !Number.isInteger(requestedId) ||
+      requestedId <= 0 ||
+      pinyinLessons.length === 0
+    ) {
+      return;
+    }
+
+    const requestedLesson = pinyinLessons.find(
+      (lesson) => lesson.id === requestedId
+    );
+
+    if (!requestedLesson) {
+      return;
+    }
+
+    setSelectedPinyinLesson(requestedLesson);
+
+    window.setTimeout(() => {
+      document.getElementById(`pinyin-${requestedId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }, [pinyinLessons]);
+
+    useEffect(() => {
+      async function loadPinyinLessonMedia() {
+      if (!selectedPinyinLesson) {
+        setPinyinLessonMedia([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("pinyin_lesson_media")
+        .select(
+          "id, lesson_id, media_type, media_url, alt_text, caption, sort_key, created_at"
+        )
+        .eq("lesson_id", selectedPinyinLesson.id)
+        .order("sort_key", { ascending: true })
+        .order("id", { ascending: true });
+
+      if (error) {
+        logSupabaseError("loadPinyinLessonMedia", error);
+        setPinyinLessonMedia([]);
+        return;
+      }
+
+      setPinyinLessonMedia((data ?? []) as PinyinLessonMedia[]);
+    }
+
+    loadPinyinLessonMedia();
+  }, [selectedPinyinLesson]);
+    useEffect(() => {
+      if (!selectedNews) {
+        return;
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -931,11 +1042,120 @@ const displayedWord =
         </section>
 
         {/* 8. Pinyin lessons and music */}
-        <section id="pinyin-lessons" className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5">
-          <h2 className="text-xl font-bold">Pinyin Lessons</h2>
-          <p className="mt-2 text-gray-700">พื้นที่สำหรับหลักการอ่านและระบบพินอินภาษาไฮ้หน่ำ</p>
-        </section>
+        <section
+  id="pinyin-lessons"
+  className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5"
+>
+  <h2 className="text-xl font-bold">Pinyin Lessons</h2>
 
+  {pinyinLessons.length === 0 ? (
+    <p className="mt-3 text-gray-700">
+      ยังไม่มีบทเรียนที่เผยแพร่ในขณะนี้
+    </p>
+  ) : (
+    <div className="mt-4 space-y-3">
+      {pinyinLessons.map((lesson) => (
+        <button
+          key={lesson.id}
+          type="button"
+          onClick={() => setSelectedPinyinLesson(lesson)}
+          className={`w-full rounded-lg border p-3 text-left transition ${
+            selectedPinyinLesson?.id === lesson.id
+              ? "border-rose-500 bg-white"
+              : "border-rose-200 bg-white/80 hover:bg-white"
+          }`}
+        >
+          <div className="font-bold text-gray-900">
+            {lesson.title}
+          </div>
+
+          {lesson.title_chinese ? (
+            <div className="mt-1 text-lg text-red-700">
+              {lesson.title_chinese}
+            </div>
+          ) : null}
+        </button>
+      ))}
+    </div>
+  )}
+    {selectedPinyinLesson ? (
+    <div
+      id={`pinyin-${selectedPinyinLesson.id}`}
+      className="scroll-mt-24 mt-4 rounded-lg border border-rose-200 bg-white p-4"
+    >
+      <h3 className="text-lg font-bold text-gray-900">
+        {selectedPinyinLesson.title}
+      </h3>
+
+      {selectedPinyinLesson.title_chinese ? (
+        <div className="mt-1 text-xl text-red-700">
+          {selectedPinyinLesson.title_chinese}
+        </div>
+      ) : null}
+
+      {selectedPinyinLesson.content ? (
+        <div className="mt-4 whitespace-pre-wrap leading-8 text-gray-800">
+          {renderDictionaryLinks(selectedPinyinLesson.content)}
+        </div>
+            ) : null}
+            {pinyinLessonMedia
+              .filter((media) => media.media_type === "video")
+        .map((media) => {
+
+          const videoId = getYouTubeVideoId(media.media_url);
+
+          if (!videoId) {
+            return null;
+          }
+
+          return (
+            <div key={media.id} className="mt-4">
+              <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-lg">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+                  title={media.alt_text || media.caption || selectedPinyinLesson.title}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+
+              {media.caption ? (
+                <p className="mt-2 text-sm text-gray-600">
+                  {media.caption}
+                </p>
+              ) : null}
+            </div>
+          );
+        })}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() =>
+            handleCopyContentLink("pinyin", selectedPinyinLesson.id)
+          }
+          className="rounded-md bg-purple-700 px-3 py-2 text-sm font-bold text-white transition hover:bg-purple-800"
+        >
+          Copy Link This Content
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setSelectedPinyinLesson(null)}
+          className="rounded-md border border-stone-300 px-3 py-2 text-sm text-gray-700 hover:bg-stone-50"
+        >
+          ปิดบทเรียน
+        </button>
+
+        {shareMessage ? (
+          <span className="text-sm font-medium text-green-700">
+            {shareMessage}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  ) : null}
+</section>
         <section id="music" className="scroll-mt-24 rounded-xl border border-red-200 bg-red-100 p-5">
           <h2 className="text-xl font-bold">Music / เพลงไฮ้หน่ำ</h2>
           <p className="mt-2 text-gray-700">รวมเพลงและเสียงดนตรีภาษาไฮ้หน่ำจากแหล่งเผยแพร่ต้นฉบับ</p>
