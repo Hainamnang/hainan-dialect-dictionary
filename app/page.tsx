@@ -615,10 +615,10 @@ const displayedWord =
         {/* 1. Header */}
         <section id="home" className="scroll-mt-24 rounded-xl border bg-white p-3 sm:p-4">
           <Image
-            src="/heading.jpg"
+            src="/HomePage.jpg"
             alt="Hainanese Dialect Dictionary"
-            width={1366}
-            height={466}
+            width={2048}
+            height={1055}
             priority
             className="w-full h-auto rounded-lg"
           />
