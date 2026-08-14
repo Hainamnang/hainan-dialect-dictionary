@@ -90,6 +90,8 @@ type News = {
   created_at: string;
 };
 
+type ShareContentType = "article" | "video" | "music" | "news";
+
 const getSafeSourceUrl = (sourceUrl: string) => {
   try {
     const url = new URL(sourceUrl);
@@ -140,6 +142,7 @@ export default function Home() {
   const [music, setMusic] = useState<Music[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
+  const [shareMessage, setShareMessage] = useState("");
   const vocabularyDetailRef = useRef<HTMLElement | null>(null);
 
 const handleSelectWord = (word: Word) => {
@@ -203,6 +206,48 @@ const handleSearchChange = (value: string) => {
   setSelectedWord(nextFilteredWords.length > 0 ? nextFilteredWords[0] : null);
 };
 
+const buildContentShareUrl = (contentType: ShareContentType, id: number) => {
+  const url = new URL("/", window.location.origin);
+  url.searchParams.set("content", contentType);
+  url.searchParams.set("id", String(id));
+  return url.toString();
+};
+
+const handleCopyContentLink = async (
+  contentType: ShareContentType,
+  id: number
+) => {
+  const url = buildContentShareUrl(contentType, id);
+  setShareMessage("");
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = url;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const copied = document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      if (!copied) {
+        throw new Error("Copy failed");
+      }
+    }
+
+    setShareMessage("✓ Copy Link แล้ว");
+    window.setTimeout(() => setShareMessage(""), 2500);
+  } catch {
+    setShareMessage("คัดลอกลิงก์ไม่สำเร็จ");
+    window.setTimeout(() => setShareMessage(""), 2500);
+  }
+};
+
   useEffect(() => {
     async function loadWords() {
       const { data, error } = await supabase
@@ -239,6 +284,33 @@ const handleSearchChange = (value: string) => {
 
     loadArticles();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("content") !== "article") {
+      return;
+    }
+
+    const requestedId = Number(params.get("id"));
+    if (!Number.isInteger(requestedId) || requestedId <= 0 || articles.length === 0) {
+      return;
+    }
+
+    const requestedArticle = articles.find((article) => article.id === requestedId);
+    if (!requestedArticle) {
+      return;
+    }
+
+    setSelectedArticle(requestedArticle);
+
+    window.setTimeout(() => {
+      document.getElementById(`article-${requestedId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }, [articles]);
 
   useEffect(() => {
     async function loadArticleImages() {
@@ -632,7 +704,10 @@ const displayedWord =
             )}
 
             {selectedArticle ? (
-              <div className="mt-4 rounded-lg border border-stone-200 bg-white p-4">
+              <div
+                id={`article-${selectedArticle.id}`}
+                className="scroll-mt-24 mt-4 rounded-lg border border-stone-200 bg-white p-4"
+              >
                 <h3 className="font-semibold text-gray-900">{selectedArticle.title || "บทความ"}</h3>
                 <div
                   className="mt-3 text-gray-700"
@@ -640,13 +715,27 @@ const displayedWord =
             >
                   {selectedArticle.content || ""}
             </div>
-                <button
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyContentLink("article", selectedArticle.id)}
+                    className="rounded-md bg-purple-700 px-3 py-2 text-sm font-bold text-white transition hover:bg-purple-800"
+                  >
+                    Copy Link This Content
+                  </button>
+
+                  <button
                     type="button"
                     onClick={() => setSelectedArticle(null)}
-                    className="mt-4 rounded-md border border-stone-300 px-3 py-2 text-sm text-gray-700 hover:bg-stone-50"
+                    className="rounded-md border border-stone-300 px-3 py-2 text-sm text-gray-700 hover:bg-stone-50"
                   >
                     ปิดบทความ
                   </button>
+
+                  {shareMessage ? (
+                    <span className="text-sm font-medium text-green-700">{shareMessage}</span>
+                  ) : null}
+                </div>
 
                 {articleImages.length > 0 ? (
                   <div className="mt-6 grid gap-4 md:grid-cols-2">
