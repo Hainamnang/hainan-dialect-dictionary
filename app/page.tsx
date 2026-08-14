@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { createClient } from "@supabase/supabase-js";
 
@@ -135,6 +135,7 @@ export default function Home() {
   const [words, setWords] = useState<Word[]>([]);
   const [search, setSearch] = useState("");
   const [selectedWord, setSelectedWord] = useState<Word | null>(null);
+  const [linkedWordId, setLinkedWordId] = useState<number | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [articleImages, setArticleImages] = useState<ArticleImage[]>([]);
@@ -157,6 +158,18 @@ const handleSelectWord = (word: Word) => {
 };
 
 const handleSearchChange = (value: string) => {
+  if (linkedWordId !== null) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("dictionary_id");
+
+    if (url.hash === "#dictionary") {
+      url.hash = "";
+    }
+
+    window.history.replaceState({}, "", url.toString());
+  }
+
+  setLinkedWordId(null);
   setSearch(value);
 
   const normalized = normalizeText(value);
@@ -204,6 +217,79 @@ const handleSearchChange = (value: string) => {
     .slice(0, 20);
 
   setSelectedWord(nextFilteredWords.length > 0 ? nextFilteredWords[0] : null);
+};
+
+const handleDictionaryWordLink = (wordId: number) => {
+  const requestedWord = words.find((word) => word.id === wordId);
+
+  if (!requestedWord) {
+    return;
+  }
+
+  setLinkedWordId(requestedWord.id);
+  setSelectedWord(requestedWord);
+  setSearch(
+    requestedWord.simplified ||
+      requestedWord.traditional ||
+      requestedWord.meaning_th ||
+      ""
+  );
+
+  const url = new URL("/", window.location.origin);
+  url.searchParams.set("dictionary_id", String(requestedWord.id));
+  url.hash = "dictionary";
+  window.history.replaceState({}, "", url.toString());
+
+  window.setTimeout(() => {
+    document.getElementById("dictionary")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 0);
+};
+
+const renderDictionaryLinks = (text: string) => {
+  const pattern = /\[\[([^\[\]|]+)\|(\d+)\]\]/g;
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const label = match[1].trim();
+    const wordId = Number(match[2]);
+    const availableWord = words.find((word) => word.id === wordId);
+    const isChineseOnly = /^[\p{Script=Han}]+$/u.test(label);
+
+    if (availableWord && isChineseOnly) {
+      parts.push(
+        <a
+          key={`dictionary-${wordId}-${match.index}`}
+          href={`/?dictionary_id=${wordId}#dictionary`}
+          onClick={(event) => {
+            event.preventDefault();
+            handleDictionaryWordLink(wordId);
+          }}
+          className="font-semibold text-purple-700 underline decoration-dotted underline-offset-4 hover:text-purple-900"
+        >
+          {label}
+        </a>
+      );
+    } else {
+      parts.push(label);
+    }
+
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts;
 };
 
 const buildContentShareUrl = (contentType: ShareContentType, id: number) => {
@@ -267,6 +353,41 @@ const handleCopyContentLink = async (
 
     loadWords();
   }, []);
+
+  useEffect(() => {
+    if (words.length === 0) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedId = Number(params.get("dictionary_id"));
+
+    if (!Number.isInteger(requestedId) || requestedId <= 0) {
+      return;
+    }
+
+    const requestedWord = words.find((word) => word.id === requestedId);
+
+    if (!requestedWord) {
+      return;
+    }
+
+    setLinkedWordId(requestedWord.id);
+    setSelectedWord(requestedWord);
+    setSearch(
+      requestedWord.simplified ||
+        requestedWord.traditional ||
+        requestedWord.meaning_th ||
+        ""
+    );
+
+    window.setTimeout(() => {
+      document.getElementById("dictionary")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }, [words]);
 
   useEffect(() => {
     async function loadArticles() {
@@ -462,14 +583,21 @@ const filteredWords =
         })
         .slice(0, 20);
 
-const displayedWord =
-  normalizedSearch === "" || filteredWords.length === 0
+const linkedWord =
+  linkedWordId === null
     ? null
-    : selectedWord && filteredWords.some((word) => word.id === selectedWord.id)
-      ? selectedWord
-      : filteredWords[0];
+    : words.find((word) => word.id === linkedWordId) || null;
 
-  const hasSearch = normalizedSearch !== "";
+const displayedWord =
+  linkedWordId !== null
+    ? linkedWord
+    : normalizedSearch === "" || filteredWords.length === 0
+      ? null
+      : selectedWord && filteredWords.some((word) => word.id === selectedWord.id)
+        ? selectedWord
+        : filteredWords[0];
+
+  const hasSearch = normalizedSearch !== "" || linkedWordId !== null;
   const selectedNewsImageUrl = selectedNews?.image_url
     ? getSafeSourceUrl(selectedNews.image_url)
     : null;
@@ -618,8 +746,8 @@ const displayedWord =
 )}
         </section>
         ) : null}
-{/* 5. Search Results — hidden until a search begins */}
-        {hasSearch ? (
+{/* 5. Search Results — shown only for a normal manual search */}
+        {hasSearch && linkedWordId === null ? (
         <section className="bg-white rounded-xl border p-4">
           <h2 className="mb-4 font-bold">
             Search Results / ค้นหาเพิ่มเติม --&gt; คลิกเลือกคำอื่นๆ ที่ปรากฏด้านล่าง ▼
@@ -684,7 +812,7 @@ const displayedWord =
                          <div className="font-semibold text-gray-900">{article.title || "ไม่มีหัวข้อ"}</div>
 
                          {article.summary ? (
-                              <p className="mt-1 text-sm text-gray-600">{article.summary}</p>
+                              <p className="mt-1 text-sm text-gray-600">{renderDictionaryLinks(article.summary)}</p>
                          ) : null}
 
                       {article.published_at ? (
@@ -713,7 +841,7 @@ const displayedWord =
                   className="mt-3 text-gray-700"
                   style={{ whiteSpace: "pre-wrap" }}
             >
-                  {selectedArticle.content || ""}
+                  {renderDictionaryLinks(selectedArticle.content || "")}
             </div>
                 <div className="mt-4 flex flex-wrap items-center gap-2">
                   <button
@@ -782,7 +910,7 @@ const displayedWord =
                     <div key={video.id} className="rounded-lg border border-stone-200 bg-white p-3">
                       <div className="font-semibold text-gray-900">{video.title || "ไม่มีหัวข้อ"}</div>
                       {video.description ? (
-                        <p className="mt-1 text-sm text-gray-600">{video.description}</p>
+                        <p className="mt-1 text-sm text-gray-600">{renderDictionaryLinks(video.description)}</p>
                       ) : null}
                       <div className="mt-3 w-full max-w-[900px] rounded-lg overflow-hidden border border-stone-200 bg-black">
                         <iframe
@@ -856,12 +984,12 @@ const displayedWord =
                         <p className="mt-2 text-sm font-medium text-gray-700">ศิลปิน: {song.artist}</p>
                       ) : null}
                       {song.description ? (
-                        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">{song.description}</p>
+                        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">{renderDictionaryLinks(song.description)}</p>
                       ) : null}
                       {song.language_notes ? (
                         <div className="mt-3 rounded-lg bg-amber-50 p-3 text-sm leading-6 text-gray-700">
                           <span className="font-semibold">หมายเหตุด้านภาษา:</span>{" "}
-                          <span className="whitespace-pre-wrap">{song.language_notes}</span>
+                          <span className="whitespace-pre-wrap">{renderDictionaryLinks(song.language_notes)}</span>
                         </div>
                       ) : null}
 
@@ -998,11 +1126,11 @@ const displayedWord =
               ) : null}
 
               {selectedNews.summary ? (
-                <p className="mt-5 whitespace-pre-wrap text-lg leading-7 text-gray-600">{selectedNews.summary}</p>
+                <p className="mt-5 whitespace-pre-wrap text-lg leading-7 text-gray-600">{renderDictionaryLinks(selectedNews.summary)}</p>
               ) : null}
               {selectedNews.content ? (
                 <p className="mt-5 whitespace-pre-wrap border-t border-gray-200 pt-5 leading-8 text-gray-800">
-                  {selectedNews.content}
+                  {renderDictionaryLinks(selectedNews.content)}
                 </p>
               ) : null}
               {selectedNewsSourceUrl ? (
