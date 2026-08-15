@@ -1098,6 +1098,23 @@ const displayedWord =
           {renderDictionaryLinks(selectedPinyinLesson.content)}
         </div>
             ) : null}
+        {pinyinLessonMedia
+  .filter((media) => media.media_type === "image")
+  .map((media) => (
+    <figure key={media.id} className="mt-4">
+      <img
+        src={media.media_url}
+        alt={media.alt_text || selectedPinyinLesson.title}
+        className="max-h-[520px] w-full rounded-lg object-contain"
+      />
+
+      {media.caption ? (
+        <figcaption className="mt-2 text-sm text-gray-600">
+          {media.caption}
+        </figcaption>
+      ) : null}
+    </figure>
+  ))}
             {pinyinLessonMedia
               .filter((media) => media.media_type === "video")
         .map((media) => {
@@ -1127,7 +1144,25 @@ const displayedWord =
               ) : null}
             </div>
           );
-        })}
+  })}
+              {pinyinLessonMedia
+          .filter((media) => media.media_type === "audio")
+          .map((media) => (
+             <div key={media.id} className="mt-4">
+               <audio
+                 controls
+                 preload="metadata"
+                 src={media.media_url}
+                className="w-full"
+              />
+
+              {media.caption ? (
+                <p className="mt-2 text-sm text-gray-600">
+              {media.caption}
+               </p>
+               ) : null}
+             </div>
+  ))}
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
