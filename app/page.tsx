@@ -96,6 +96,17 @@ type PinyinLessonMedia = {
   created_at: string;
 };
 
+type ExternalLink = {
+  id: number;
+  title: string;
+  url: string;
+  link_label: string | null;
+  description: string | null;
+  image_url: string | null;
+  sort_key: number;
+  is_published: boolean;
+  created_at: string;
+};
 type News = {
   id: number;
   title: string;
@@ -115,7 +126,8 @@ type ShareContentType =
   | "video"
   | "music"
   | "news"
-  | "pinyin";
+  | "pinyin"
+  | "link";
 
 const getSafeSourceUrl = (sourceUrl: string) => {
   try {
@@ -166,6 +178,7 @@ export default function Home() {
   const [articleImages, setArticleImages] = useState<ArticleImage[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [music, setMusic] = useState<Music[]>([]);
+  const [externalLinks, setExternalLinks] = useState<ExternalLink[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [shareMessage, setShareMessage] = useState("");
@@ -520,10 +533,64 @@ const handleCopyContentLink = async (
       }
     }
 
-    loadMusic();
+        loadMusic();
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
+    async function loadExternalLinks() {
+      const { data, error } = await supabase
+        .from("links")
+        .select(
+          "id, title, url, link_label, description, image_url, sort_key, is_published, created_at"
+        )
+        .eq("is_published", true)
+        .order("sort_key", { ascending: true })
+        .order("id", { ascending: true });
+
+      if (error) {
+        logSupabaseError("loadExternalLinks", error);
+      } else {
+        setExternalLinks((data as ExternalLink[]) || []);
+      }
+    }
+
+    loadExternalLinks();
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("content") !== "link") {
+      return;
+    }
+
+    const requestedId = Number(params.get("id"));
+
+    if (
+      !Number.isInteger(requestedId) ||
+      requestedId <= 0 ||
+      externalLinks.length === 0
+    ) {
+      return;
+    }
+
+    const requestedLink = externalLinks.find(
+      (link) => link.id === requestedId
+    );
+
+    if (!requestedLink) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      document.getElementById(`link-${requestedId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }, [externalLinks]);
+
+  useEffect(() => {
     async function loadNews() {
       const { data, error } = await supabase
         .from("news")
@@ -542,7 +609,8 @@ const handleCopyContentLink = async (
 
     loadNews();
   }, []);
-    useEffect(() => {
+
+        useEffect(() => {
     async function loadPinyinLessons() {
       const { data, error } = await supabase
         .from("pinyin_lessons")
@@ -559,7 +627,7 @@ const handleCopyContentLink = async (
       setPinyinLessons((data ?? []) as PinyinLesson[]);
     }
 
-        loadPinyinLessons();
+    loadPinyinLessons();
   }, []);
 
   useEffect(() => {
