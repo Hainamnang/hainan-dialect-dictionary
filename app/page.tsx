@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import Image from "next/image";
+import HeaderSection from "@/components/HeaderSection";
 import { createClient } from "@supabase/supabase-js";
 import ContactSection from "@/components/ContactSection";
 
@@ -793,16 +793,7 @@ const displayedWord =
       <div className="mx-auto max-w-7xl">
 
         {/* 1. Header */}
-        <section id="home" className="scroll-mt-24 rounded-xl border bg-white p-3 sm:p-4">
-          <Image
-            src="/HomePage.jpg"
-            alt="Hainanese Dialect Dictionary"
-            width={2048}
-            height={1055}
-            priority
-            className="w-full h-auto rounded-lg"
-          />
-        </section>
+        <HeaderSection />
 
         {/* 2. Main menu */}
         <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-1 shadow-sm">
