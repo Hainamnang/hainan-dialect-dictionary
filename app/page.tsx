@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import HeaderSection from "@/components/HeaderSection";
 import MainMenu from "@/components/MainMenu";
-import { createClient } from "@supabase/supabase-js";
 import ContactSection from "@/components/ContactSection";
 import { getSafeSourceUrl, getYouTubeVideoId } from "@/lib/contentUrls";
+import { logSupabaseError, supabase } from "@/lib/supabaseClient";
 import type {
   Article,
   ArticleImage,
@@ -18,23 +18,6 @@ import type {
   Video,
   Word,
 } from "@/types/content";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-const logSupabaseError = (
-  context: string,
-  error: { message?: string; details?: string; hint?: string; code?: string } | null
-) => {
-  console.error(`[Supabase] ${context}`, {
-    message: error?.message ?? null,
-    details: error?.details ?? null,
-    hint: error?.hint ?? null,
-    code: error?.code ?? null,
-  });
-};
 
 export default function Home() {
   const [words, setWords] = useState<Word[]>([]);
