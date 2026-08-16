@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import HeaderSection from "@/components/HeaderSection";
+import MainMenu from "@/components/MainMenu";
 import { createClient } from "@supabase/supabase-js";
 import ContactSection from "@/components/ContactSection";
 
@@ -796,26 +797,7 @@ const displayedWord =
         <HeaderSection />
 
         {/* 2. Main menu */}
-        <nav aria-label="เมนูหลัก" className="sticky top-0 z-20 mt-4 rounded-xl bg-purple-800 p-1 shadow-sm">
-          <div className="flex items-center justify-between sm:w-2/3 sm:mx-auto">
-            {[
-              ["Home", "#home"],
-              ["Dictionary", "#dictionary"],
-              ["Pinyin", "#pinyin-lessons"],
-              ["Article", "#articles"],
-              ["Video", "#videos"],
-              ["Music", "#music"],
-            ].map(([label, href]) => (
-              <a
-                key={label}
-                href={href}
-                className="px-1 py-1 text-center text-[12px] leading-none font-bold text-white transition hover:bg-purple-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                {label}
-              </a>
-            ))}
-          </div>
-        </nav>
+        <MainMenu />
 
         <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
           <div className="min-w-0 space-y-6">
