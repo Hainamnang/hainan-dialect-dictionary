@@ -9,6 +9,7 @@ import ExternalLinksSection from "@/components/ExternalLinksSection";
 import NewsSection from "@/components/NewsSection";
 import NewsDialog from "@/components/NewsDialog";
 import ArticleSection from "@/components/ArticleSection";
+import PoemStorySection from "@/components/PoemStorySection";
 import ContactSection from "@/components/ContactSection";
 import { getYouTubeVideoId } from "@/lib/contentUrls";
 import { logSupabaseError, supabase } from "@/lib/supabaseClient";
@@ -939,10 +940,7 @@ const displayedWord =
               news={news}
               onSelectNews={setSelectedNews}
             />
-            <section className="min-h-52 rounded-xl bg-blue-700 p-5 text-white">
-              <h2 className="text-lg font-bold">Poem and Story</h2>
-              <p className="mt-2 text-sm text-blue-50">พื้นที่สำหรับบทกวีและเรื่องเล่า</p>
-            </section>
+            <PoemStorySection />
           </aside>
         </div>
 
