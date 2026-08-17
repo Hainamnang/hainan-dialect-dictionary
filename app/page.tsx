@@ -548,27 +548,6 @@ const handleCopyContentLink = async (
 
     loadPinyinLessonMedia();
   }, [selectedPinyinLesson]);
-    useEffect(() => {
-      if (!selectedNews) {
-        return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedNews(null);
-      }
-    };
-    const previousOverflow = document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [selectedNews]);
-
   const normalizeText = (value: string) =>
   value
     .normalize("NFC")

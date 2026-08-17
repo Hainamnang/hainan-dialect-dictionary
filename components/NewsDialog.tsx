@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { getSafeSourceUrl, getYouTubeVideoId } from "@/lib/contentUrls";
 import type { News } from "@/types/content";
 
@@ -15,6 +15,28 @@ export default function NewsDialog({
   onClose,
   renderDictionaryLinks,
 }: NewsDialogProps) {
+  useEffect(() => {
+    if (!selectedNews) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedNews, onClose]);
+
   if (!selectedNews) {
     return null;
   }
