@@ -10,8 +10,8 @@ import NewsSection from "@/components/NewsSection";
 import NewsDialog from "@/components/NewsDialog";
 import ArticleSection from "@/components/ArticleSection";
 import PoemStorySection from "@/components/PoemStorySection";
+import PinyinSection from "@/components/PinyinSection";
 import ContactSection from "@/components/ContactSection";
-import { getYouTubeVideoId } from "@/lib/contentUrls";
 import { logSupabaseError, supabase } from "@/lib/supabaseClient";
 import type {
   Article,
@@ -776,155 +776,19 @@ const displayedWord =
         />
 
         {/* 8. Pinyin lessons and music */}
-        <section
-  id="pinyin-lessons"
-  className="scroll-mt-24 rounded-xl border border-rose-200 bg-rose-100 p-5"
->
-  <h2 className="text-xl font-bold">Pinyin Lessons</h2>
-
-  {pinyinLessons.length === 0 ? (
-    <p className="mt-3 text-gray-700">
-      ยังไม่มีบทเรียนที่เผยแพร่ในขณะนี้
-    </p>
-  ) : (
-    <div className="mt-4 space-y-3">
-      {pinyinLessons.map((lesson) => (
-        <button
-          key={lesson.id}
-          type="button"
-          onClick={() => setSelectedPinyinLesson(lesson)}
-          className={`w-full rounded-lg border p-3 text-left transition ${
-            selectedPinyinLesson?.id === lesson.id
-              ? "border-rose-500 bg-white"
-              : "border-rose-200 bg-white/80 hover:bg-white"
-          }`}
-        >
-          <div className="font-bold text-gray-900">
-            {lesson.title}
-          </div>
-
-          {lesson.title_chinese ? (
-            <div className="mt-1 text-lg text-red-700">
-              {lesson.title_chinese}
-            </div>
-          ) : null}
-        </button>
-      ))}
-    </div>
-  )}
-    {selectedPinyinLesson ? (
-    <div
-      id={`pinyin-${selectedPinyinLesson.id}`}
-      className="scroll-mt-24 mt-4 rounded-lg border border-rose-200 bg-white p-4"
-    >
-      <h3 className="text-lg font-bold text-gray-900">
-        {selectedPinyinLesson.title}
-      </h3>
-
-      {selectedPinyinLesson.title_chinese ? (
-        <div className="mt-1 text-xl text-red-700">
-          {selectedPinyinLesson.title_chinese}
-        </div>
-      ) : null}
-
-      {selectedPinyinLesson.content ? (
-        <div className="mt-4 whitespace-pre-wrap leading-8 text-gray-800">
-          {renderDictionaryLinks(selectedPinyinLesson.content)}
-        </div>
-            ) : null}
-        {pinyinLessonMedia
-  .filter((media) => media.media_type === "image")
-  .map((media) => (
-    <figure key={media.id} className="mt-4">
-      <img
-        src={media.media_url}
-        alt={media.alt_text || selectedPinyinLesson.title}
-        className="max-h-[520px] w-full rounded-lg object-contain"
-      />
-
-      {media.caption ? (
-        <figcaption className="mt-2 text-sm text-gray-600">
-          {media.caption}
-        </figcaption>
-      ) : null}
-    </figure>
-  ))}
-            {pinyinLessonMedia
-              .filter((media) => media.media_type === "video")
-        .map((media) => {
-
-          const videoId = getYouTubeVideoId(media.media_url);
-
-          if (!videoId) {
-            return null;
+        <PinyinSection
+          lessons={pinyinLessons}
+          selectedLesson={selectedPinyinLesson}
+          media={pinyinLessonMedia}
+          shareMessage={shareMessage}
+          onSelectLesson={setSelectedPinyinLesson}
+          onCloseLesson={() => setSelectedPinyinLesson(null)}
+          onCopyLink={(lessonId) =>
+            handleCopyContentLink("pinyin", lessonId)
           }
+          renderDictionaryLinks={renderDictionaryLinks}
+        />
 
-          return (
-            <div key={media.id} className="mt-4">
-              <div className="aspect-video w-full max-w-2xl overflow-hidden rounded-lg">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${videoId}`}
-                  title={media.alt_text || media.caption || selectedPinyinLesson.title}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-
-              {media.caption ? (
-                <p className="mt-2 text-sm text-gray-600">
-                  {media.caption}
-                </p>
-              ) : null}
-            </div>
-          );
-  })}
-              {pinyinLessonMedia
-          .filter((media) => media.media_type === "audio")
-          .map((media) => (
-             <div key={media.id} className="mt-4">
-               <audio
-                 controls
-                 preload="metadata"
-                 src={media.media_url}
-                className="w-full"
-              />
-
-              {media.caption ? (
-                <p className="mt-2 text-sm text-gray-600">
-              {media.caption}
-               </p>
-               ) : null}
-             </div>
-  ))}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() =>
-            handleCopyContentLink("pinyin", selectedPinyinLesson.id)
-          }
-          className="rounded-md bg-purple-700 px-3 py-2 text-sm font-bold text-white transition hover:bg-purple-800"
-        >
-          Copy Link This Content
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setSelectedPinyinLesson(null)}
-          className="rounded-md border border-stone-300 px-3 py-2 text-sm text-gray-700 hover:bg-stone-50"
-        >
-          ปิดบทเรียน
-        </button>
-
-        {shareMessage ? (
-          <span className="text-sm font-medium text-green-700">
-            {shareMessage}
-          </span>
-        ) : null}
-      </div>
-    </div>
-  ) : null}
-</section>
         <MusicSection
           music={music}
           renderDictionaryLinks={renderDictionaryLinks}
