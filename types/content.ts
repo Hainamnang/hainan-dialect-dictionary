@@ -99,6 +99,24 @@ export type News = {
   is_published: boolean;
   created_at: string;
 };
+export type Edito = {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  is_published: boolean;
+};
+
+export type EditoImage = {
+  id: number;
+  edito_id: number;
+  image_url: string;
+  alt_text: string | null;
+  caption: string | null;
+  sort_key: number;
+  created_at: string;
+};
 
 export type ShareContentType =
   | "article"
@@ -106,4 +124,5 @@ export type ShareContentType =
   | "music"
   | "news"
   | "pinyin"
-  | "link";
+  | "link"
+  | "edito";

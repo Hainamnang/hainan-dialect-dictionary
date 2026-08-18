@@ -6,6 +6,8 @@ import MainMenu from "@/components/MainMenu";
 import VideoSection from "@/components/VideoSection";
 import MusicSection from "@/components/MusicSection";
 import ExternalLinksSection from "@/components/ExternalLinksSection";
+import EditoSection from "@/components/EditoSection";
+import EditoDialog from "@/components/EditoDialog";
 import NewsSection from "@/components/NewsSection";
 import NewsDialog from "@/components/NewsDialog";
 import ArticleSection from "@/components/ArticleSection";
@@ -17,6 +19,8 @@ import { logSupabaseError, supabase } from "@/lib/supabaseClient";
 import type {
   Article,
   ArticleImage,
+  Edito,
+  EditoImage,
   ExternalLink,
   Music,
   News,
@@ -35,6 +39,9 @@ export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [articleImages, setArticleImages] = useState<ArticleImage[]>([]);
+  const [edito, setEdito] = useState<Edito | null>(null);
+  const [editoImages, setEditoImages] = useState<EditoImage[]>([]);
+  const [isEditoOpen, setIsEditoOpen] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
   const [music, setMusic] = useState<Music[]>([]);
   const [externalLinks, setExternalLinks] = useState<ExternalLink[]>([]);
@@ -335,6 +342,30 @@ const handleCopyContentLink = async (
     }, 0);
   }, [articles]);
 
+    useEffect(() => {
+      if (!edito) {
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get("content") !== "edito") {
+        return;
+      }
+
+      const requestedId = Number(params.get("id"));
+
+      if (!Number.isInteger(requestedId) || requestedId <= 0) {
+        return;
+     }
+
+      if (edito.id !== requestedId) {
+       return;
+     }
+
+      setIsEditoOpen(true);
+  }, [edito]);
+
   useEffect(() => {
     async function loadArticleImages() {
       if (!selectedArticle) {
@@ -357,7 +388,49 @@ const handleCopyContentLink = async (
 
     loadArticleImages();
   }, [selectedArticle]);
+  useEffect(() => {
+  async function loadEdito() {
+    const { data, error } = await supabase
+      .from("edito")
+      .select("id, title, content, created_at, updated_at, is_published")
+      .eq("is_published", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
+    if (error) {
+      logSupabaseError("loadEdito", error);
+    } else {
+      setEdito((data as Edito | null) || null);
+    }
+  }
+
+  loadEdito();
+}, []);
+ useEffect(() => {
+  async function loadEditoImages() {
+    if (!edito) {
+      setEditoImages([]);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("edito_images")
+      .select(
+        "id, edito_id, image_url, alt_text, caption, sort_key, created_at"
+      )
+      .eq("edito_id", edito.id)
+      .order("sort_key", { ascending: true });
+
+    if (error) {
+      logSupabaseError("loadEditoImages", error);
+    } else {
+      setEditoImages((data as EditoImage[]) || []);
+    }
+  }
+
+  loadEditoImages();
+}, [edito]);
   useEffect(() => {
     async function loadVideos() {
       const { data, error } = await supabase
@@ -617,16 +690,25 @@ const displayedWord =
   const hasSearch = normalizedSearch !== "" || linkedWordId !== null;
   return (
     <main className="min-h-screen bg-stone-50 px-3 py-4 sm:px-6 sm:py-6">
-      <div className="mx-auto max-w-7xl">
+  <div className="mx-auto max-w-7xl">
 
-        {/* 1. Header */}
-        <HeaderSection />
+    {/* 1. Header */}
+    <HeaderSection />
 
-        {/* 2. Main menu */}
-        <MainMenu />
+    {/* 2. Main menu */}
+    <MainMenu />
 
-        <div className="mt-4 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
-          <div className="min-w-0 space-y-6">
+    <div className="mt-4 grid items-start gap-6 lg:grid-cols-[220px_minmax(0,1fr)_260px]">
+      {/* Left sidebar — Edito */}
+      <aside className="lg:sticky lg:top-24">
+        <EditoSection
+          edito={edito}
+          images={editoImages}
+          onOpen={() => setIsEditoOpen(true)}
+        />
+      </aside>
+
+      <div className="min-w-0 space-y-6">
         {/* 3–5. Dictionary */}
         <DictionarySection
           search={search}
@@ -693,17 +775,30 @@ const displayedWord =
         </div>
 
         {/* 9. Contact and footer */}
-<ContactSection />
+        <ContactSection />
+
         <footer className="py-6 text-center text-sm text-gray-500">
           Hainanese Dialect Dictionary — Version 0.1
         </footer>
-      </div>
+        </div>
+
+        {isEditoOpen ? (
+          <EditoDialog
+            edito={edito}
+            images={editoImages}
+            shareMessage={shareMessage}
+            onCopyLink={(editoId) =>
+              handleCopyContentLink("edito", editoId)
+       }
+            onClose={() => setIsEditoOpen(false)}
+         />
+  ) : null}
 
       <NewsDialog
         selectedNews={selectedNews}
         onClose={() => setSelectedNews(null)}
         renderDictionaryLinks={renderDictionaryLinks}
-      />
-    </main>
+       />
+      </main>
   );
 }

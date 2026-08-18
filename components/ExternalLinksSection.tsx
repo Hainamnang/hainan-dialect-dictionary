@@ -13,7 +13,7 @@ export default function ExternalLinksSection({
       id="links"
       className="min-h-36 scroll-mt-24 rounded-xl bg-blue-500 p-4 text-white"
     >
-      <h2 className="text-lg font-bold">Link เพื่อนบ้าน</h2>
+      <h2 className="text-lg font-bold">Link to 家己人 ดากีหนั่ง</h2>
 
       {externalLinks.length === 0 ? (
         <p className="mt-2 text-sm text-blue-50">
