@@ -250,7 +250,7 @@ const handleCopyContentLink = async (
         .select(
           "id, sort_key, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example"
         )
-        .lte("sort_key", 503)
+        .lte("sort_key", 516)
         .order("sort_key", { ascending: true });
 
       if (error) {
