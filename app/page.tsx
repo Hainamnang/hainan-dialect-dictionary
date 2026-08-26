@@ -12,6 +12,7 @@ import NewsSection from "@/components/NewsSection";
 import NewsDialog from "@/components/NewsDialog";
 import ArticleSection from "@/components/ArticleSection";
 import PoemStorySection from "@/components/PoemStorySection";
+import PoemStoryDialog from "@/components/PoemStoryDialog";
 import PinyinSection from "@/components/PinyinSection";
 import DictionarySection from "@/components/DictionarySection";
 import ContactSection from "@/components/ContactSection";
@@ -26,6 +27,7 @@ import type {
   News,
   PinyinLesson,
   PinyinLessonMedia,
+  PoemStory,
   ShareContentType,
   Video,
   Word,
@@ -47,6 +49,9 @@ export default function Home() {
   const [externalLinks, setExternalLinks] = useState<ExternalLink[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
+  const [poemStories, setPoemStories] = useState<PoemStory[]>([]);
+  const [selectedPoemStory, setSelectedPoemStory] =
+    useState<PoemStory | null>(null);
   const [shareMessage, setShareMessage] = useState("");
   const vocabularyDetailRef = useRef<HTMLElement | null>(null);
   const [pinyinLessons, setPinyinLessons] = useState<PinyinLesson[]>([]);
@@ -542,6 +547,61 @@ const handleCopyContentLink = async (
     loadNews();
   }, []);
 
+  useEffect(() => {
+    async function loadPoemStories() {
+      const { data, error } = await supabase
+        .from("poem_stories")
+        .select(
+          "id, title, content, header_image_url, footer_image_url, video_url, sort_key, is_published, created_at, updated_at"
+        )
+        .eq("is_published", true)
+        .order("sort_key", { ascending: true })
+        .order("id", { ascending: true });
+
+      if (error) {
+        logSupabaseError("loadPoemStories", error);
+      } else {
+        setPoemStories((data as PoemStory[]) || []);
+      }
+    }
+
+    loadPoemStories();
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("content") !== "poem-story") {
+      return;
+    }
+
+    const requestedId = Number(params.get("id"));
+
+    if (
+      !Number.isInteger(requestedId) ||
+      requestedId <= 0 ||
+      poemStories.length === 0
+    ) {
+      return;
+    }
+
+    const requestedPoemStory = poemStories.find(
+      (poemStory) => poemStory.id === requestedId
+    );
+
+    if (!requestedPoemStory) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      setSelectedPoemStory(requestedPoemStory);
+      document.getElementById(`poem-story-${requestedId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }, [poemStories]);
+
         useEffect(() => {
     async function loadPinyinLessons() {
       const { data, error } = await supabase
@@ -770,7 +830,10 @@ const displayedWord =
               news={news}
               onSelectNews={setSelectedNews}
             />
-            <PoemStorySection />
+            <PoemStorySection
+              poemStories={poemStories}
+              onSelectPoemStory={setSelectedPoemStory}
+            />
           </aside>
         </div>
 
@@ -799,6 +862,16 @@ const displayedWord =
         onClose={() => setSelectedNews(null)}
         renderDictionaryLinks={renderDictionaryLinks}
        />
+
+      <PoemStoryDialog
+        selectedPoemStory={selectedPoemStory}
+        shareMessage={shareMessage}
+        onCopyLink={(poemStoryId) =>
+          handleCopyContentLink("poem-story", poemStoryId)
+        }
+        onClose={() => setSelectedPoemStory(null)}
+        renderDictionaryLinks={renderDictionaryLinks}
+      />
       </main>
   );
 }

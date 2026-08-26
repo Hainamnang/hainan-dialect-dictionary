@@ -99,6 +99,20 @@ export type News = {
   is_published: boolean;
   created_at: string;
 };
+
+export type PoemStory = {
+  id: number;
+  title: string;
+  content: string;
+  header_image_url: string | null;
+  footer_image_url: string | null;
+  video_url: string | null;
+  sort_key: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Edito = {
   id: number;
   title: string;
@@ -123,6 +137,7 @@ export type ShareContentType =
   | "video"
   | "music"
   | "news"
+  | "poem-story"
   | "pinyin"
   | "link"
   | "edito";
