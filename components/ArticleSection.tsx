@@ -136,13 +136,13 @@ export default function ArticleSection({
                 {articleImages.map((image) => (
                   <figure
                     key={image.id}
-                    className="overflow-hidden rounded-lg border border-stone-200 bg-stone-50"
+                    className="mx-auto w-full max-w-sm overflow-hidden rounded-lg border border-stone-200 bg-stone-50"
                   >
                     {image.image_url ? (
                       <img
                         src={image.image_url}
                         alt={image.alt_text || "Article image"}
-                        className="h-56 w-full object-cover"
+                        className="h-auto w-full object-contain"
                       />
                     ) : null}
 
