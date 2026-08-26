@@ -59,6 +59,15 @@ export default function VideoSection({
                       className="h-full w-full"
                     />
                   </div>
+
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.youtube_video_id.trim()}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex rounded-lg bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
+                  >
+                    เปิดวิดีโอต้นฉบับบน YouTube
+                  </a>
                 </div>
               );
             })}
