@@ -57,6 +57,8 @@ export type PinyinLesson = {
   id: number;
   title: string;
   title_chinese: string | null;
+  thumbnail_url: string | null;
+  thumbnail_alt_text: string | null;
   content: string | null;
   sort_key: number;
   is_published: boolean;
