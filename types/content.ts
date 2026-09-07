@@ -21,6 +21,7 @@ export type Article = {
   published_at: string | null;
   created_at: string;
   content: string | null;
+  video_url: string | null;
 };
 
 export type ArticleImage = {

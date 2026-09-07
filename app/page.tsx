@@ -308,7 +308,7 @@ const handleCopyContentLink = async (
       const { data, error } = await supabase
         .from("articles")
         .select(
-          "id, sort_key, is_pinned, title, summary, cover_image_url, published_at, created_at, content"
+          "id, sort_key, is_pinned, title, summary, cover_image_url, published_at, created_at, content, video_url"
         )
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false })

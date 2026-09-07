@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, type ReactNode } from "react";
+import { getSafeSourceUrl, getYouTubeVideoId } from "@/lib/contentUrls";
 import type { Article, ArticleImage } from "@/types/content";
 
 type ArticleSectionProps = {
@@ -31,6 +32,14 @@ function ArticleDetail({
   onCopyLink,
   renderDictionaryLinks,
 }: ArticleDetailProps) {
+  const videoId = article.video_url
+    ? getYouTubeVideoId(article.video_url)
+    : null;
+  const directVideoUrl =
+    article.video_url && !videoId
+      ? getSafeSourceUrl(article.video_url)
+      : null;
+
   return (
     <div
       id={`article-${article.id}`}
@@ -94,6 +103,29 @@ function ArticleDetail({
             </figure>
           ))}
         </div>
+      ) : null}
+
+      {videoId ? (
+        <div className="mt-6 aspect-video w-full overflow-hidden rounded-lg bg-black">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+            title={`วิดีโอประกอบบทความ: ${article.title || "บทความ"}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            className="h-full w-full"
+          />
+        </div>
+      ) : directVideoUrl ? (
+        <video
+          src={directVideoUrl}
+          controls
+          playsInline
+          preload="metadata"
+          className="mt-6 max-h-[75vh] w-full rounded-lg bg-black"
+        >
+          เบราว์เซอร์นี้ไม่รองรับการเล่นวิดีโอ
+        </video>
       ) : null}
     </div>
   );
