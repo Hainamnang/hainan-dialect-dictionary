@@ -307,8 +307,12 @@ const handleCopyContentLink = async (
     async function loadArticles() {
       const { data, error } = await supabase
         .from("articles")
-        .select("id, sort_key, title, summary, cover_image_url, published_at, content")
-        .order("sort_key", { ascending: true });
+        .select(
+          "id, sort_key, is_pinned, title, summary, cover_image_url, published_at, created_at, content"
+        )
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false });
 
       if (error) {
         logSupabaseError("loadArticles", error);

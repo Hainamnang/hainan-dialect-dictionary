@@ -14,10 +14,12 @@ export type Word = {
 export type Article = {
   id: number;
   sort_key: number | null;
+  is_pinned: boolean;
   title: string | null;
   summary: string | null;
   cover_image_url: string | null;
   published_at: string | null;
+  created_at: string;
   content: string | null;
 };
 
