@@ -250,19 +250,33 @@ const handleCopyContentLink = async (
 
   useEffect(() => {
     async function loadWords() {
-      const { data, error } = await supabase
-        .from("hainan_dictionary")
-        .select(
-          "id, sort_key, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example"
-        )
-        .lte("sort_key", 566)
-        .order("sort_key", { ascending: true });
+      const pageSize = 500;
+      const allWords: Word[] = [];
 
-      if (error) {
-        logSupabaseError("loadWords", error);
-      } else {
-        setWords(data || []);
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await supabase
+          .from("hainan_dictionary")
+          .select(
+            "id, sort_key, meaning_th, simplified, traditional, hainan_pronunciation, hainan_pinyin, hainan_audio, note, example"
+          )
+          .not("sort_key", "is", null)
+          .order("sort_key", { ascending: true })
+          .order("id", { ascending: true })
+          .range(offset, offset + pageSize - 1);
+
+        if (error) {
+          logSupabaseError("loadWords", error);
+          return;
+        }
+
+        allWords.push(...((data ?? []) as Word[]));
+
+        if (!data || data.length < pageSize) {
+          break;
+        }
       }
+
+      setWords(allWords);
     }
 
     loadWords();
